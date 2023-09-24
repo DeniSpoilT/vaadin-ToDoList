@@ -14,17 +14,19 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.komarov.crudwithvaadin.dao.TaskRepository;
+import ru.komarov.crudwithvaadin.dto.TaskDTO;
 import ru.komarov.crudwithvaadin.model.Status;
 import ru.komarov.crudwithvaadin.model.Task;
+import ru.komarov.crudwithvaadin.service.TaskService;
 
 @SpringComponent
 @UIScope
 public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
-    private final TaskRepository taskRepository;
+    private final TaskService taskService;
 
     private ChangeHandler changeHandler;
-    private Task task;
+    private TaskDTO task;
 
     TextField description = new TextField("Description");
     ComboBox<Status> status = new ComboBox<>("Status");
@@ -34,17 +36,17 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
     Button delete = new Button("Delete", VaadinIcon.TRASH.create());
     HorizontalLayout actions = new HorizontalLayout(save, cancel, delete);
 
-    Binder<Task> binder = new Binder<>(Task.class);
+    Binder<TaskDTO> binder = new Binder<>(TaskDTO.class);
 
 
     @Autowired
-    public TaskEditor(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+    public TaskEditor(TaskService taskService) {
+        this.taskService = taskService;
 
         status.setItems(Status.values());
 
         binder.bindInstanceFields(this);
-        binder.forField(status).bind(Task::getStatus, Task::setStatus);
+        binder.forField(status).bind(TaskDTO::getStatus, TaskDTO::setStatus);
 
         add(description, status, actions);
 
@@ -62,12 +64,12 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
     }
 
     void delete() {
-        taskRepository.delete(task);
+        taskService.delete(task.dtoToEntity());
         changeHandler.onChange();
     }
 
     void save() {
-        taskRepository.save(task);
+        taskService.save(task.dtoToEntity());
         changeHandler.onChange();
     }
 
@@ -75,7 +77,7 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
         void onChange();
     }
 
-    public final void editTask(Task t) {
+    public final void editTask(TaskDTO t) {
         if (t == null) {
             setVisible(false);
             return;
@@ -84,7 +86,9 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
         final boolean persisted = t.getId() != null;
 
         if (persisted) {
-            task = taskRepository.findById(t.getId()).get();
+            task = taskService.findById(t.getId())
+                    .get()
+                    .entityToDto();
         } else {
             task = t;
         }

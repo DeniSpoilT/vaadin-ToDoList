@@ -7,29 +7,30 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import ru.komarov.crudwithvaadin.dao.TaskRepository;
+import ru.komarov.crudwithvaadin.dto.TaskDTO;
 import ru.komarov.crudwithvaadin.model.Status;
 import ru.komarov.crudwithvaadin.model.Task;
+import ru.komarov.crudwithvaadin.service.TaskService;
 
 import java.util.Collections;
 import java.util.List;
 
 @Route
 public class MainView extends VerticalLayout {
-    private final TaskRepository taskRepository;
+    TaskService taskService;
 
     private final TaskEditor taskEditor;
 
-    final Grid<Task> grid;
+    final Grid<TaskDTO> grid;
 
     final ComboBox<Status> filter;
 
     private final Button addNewBtn;
 
-    public MainView(TaskRepository taskRepository, TaskEditor taskEditor) {
-        this.taskRepository = taskRepository;
+    public MainView(TaskService taskService, TaskEditor taskEditor) {
+        this.taskService = taskService;
         this.taskEditor = taskEditor;
-        this.grid = new Grid<>(Task.class);
+        this.grid = new Grid<>(TaskDTO.class);
         this.filter = new ComboBox<>();
         this.addNewBtn = new Button("New task", VaadinIcon.PLUS.create());
 
@@ -45,7 +46,7 @@ public class MainView extends VerticalLayout {
         });
 
         addNewBtn.addClickListener(e ->
-                taskEditor.editTask(new Task("", "")));
+                taskEditor.editTask(new TaskDTO("", "")));
 
         grid.asSingleSelect().addValueChangeListener(e ->
                 taskEditor.editTask(e.getValue()));
@@ -72,9 +73,15 @@ public class MainView extends VerticalLayout {
 
     private void updateTaskList(Status selectedStatus) {
         if (selectedStatus == null) {
-            grid.setItems(taskRepository.findAll());
+            grid.setItems((taskService.findAll())
+                    .stream()
+                    .map(Task::entityToDto)
+                    .toList());
         } else {
-            List<Task> tasks = taskRepository.findAllByStatus(selectedStatus);
+            List<TaskDTO> tasks = taskService.findAllByStatus(selectedStatus)
+                    .stream()
+                    .map(Task::entityToDto)
+                    .toList();
             grid.setItems(Collections.emptyList());
             grid.setItems(tasks);
         }
