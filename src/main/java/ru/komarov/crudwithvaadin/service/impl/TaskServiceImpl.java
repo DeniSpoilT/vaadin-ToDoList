@@ -11,6 +11,7 @@ import ru.komarov.crudwithvaadin.model.Status;
 import ru.komarov.crudwithvaadin.model.Task;
 import ru.komarov.crudwithvaadin.service.TaskService;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,13 +36,7 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.findAllByStatus(selectedStatus);
     }
 
-    @Override
-    public List<Task> findPaginated(int pageNum, int pageSize) {
-        Pageable paging = PageRequest.of(pageNum, pageSize);
-        Page<Task> pagedResult = taskRepository.findAll(paging);
 
-        return pagedResult.toList();
-    }
 
     @Override
     public Optional<Task> findById(Long id) {
@@ -56,5 +51,12 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void save(Task task) {
         taskRepository.save(task);
+    }
+
+    @Override
+    public List<Task> findPaginated(PageRequest springPageRequest) {
+        Page<Task> pagedResult = taskRepository.findAll(springPageRequest);
+
+        return pagedResult.toList();
     }
 }

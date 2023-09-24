@@ -7,6 +7,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import ru.komarov.crudwithvaadin.dto.TaskDTO;
 import ru.komarov.crudwithvaadin.model.Status;
 import ru.komarov.crudwithvaadin.model.Task;
@@ -73,10 +74,10 @@ public class MainView extends VerticalLayout {
 
     private void updateTaskList(Status selectedStatus) {
         if (selectedStatus == null) {
-            grid.setItems((taskService.findAll())
+            grid.setItems(q -> (taskService.findPaginated(VaadinSpringDataHelpers.toSpringPageRequest(q)))
                     .stream()
                     .map(Task::entityToDto)
-                    .toList());
+                    .toList().stream());
         } else {
             List<TaskDTO> tasks = taskService.findAllByStatus(selectedStatus)
                     .stream()

@@ -1,5 +1,6 @@
 package ru.komarov.crudwithvaadin.service;
 
+import org.springframework.data.domain.PageRequest;
 import ru.komarov.crudwithvaadin.model.Status;
 import ru.komarov.crudwithvaadin.model.Task;
 
@@ -11,11 +12,12 @@ public interface TaskService {
 
     List<Task> findAllByStatus(Status selectedStatus);
 
-    List<Task> findPaginated(int pageNum, int pageSize);
+    List<Task> findPaginated(PageRequest springPageRequest);
 
     Optional<Task> findById(Long id);
 
     void delete(Task task);
 
     void save(Task task);
+
 }
