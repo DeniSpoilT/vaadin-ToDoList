@@ -41,8 +41,8 @@ In the root of the project there is a script for test filling in the table
 spring:
 datasource:
 url: jdbc:mysql://localhost:3307/todo
-username: root
-password: root
+username: username
+password: password
 
 jpa:
 hibernate:
